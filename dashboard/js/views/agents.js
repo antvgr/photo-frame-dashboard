@@ -8,9 +8,12 @@
   function minsLeft(m) { return Math.max(0, m.left - (Date.now() - V.loaded) / 60000); }
   function fmtLeft(min) {
     min = Math.round(min);
-    if (min < 60) return min + 'm';
-    if (min < 1440) return Math.floor(min / 60) + 'h ' + (min % 60) + 'm';
-    return Math.floor(min / 1440) + 'd ' + Math.floor((min % 1440) / 60) + 'h';
+    if (min < 60) return T('{m}m', { m: min });
+    if (min < 1440) return T('{h}h {m}m', { h: Math.floor(min / 60), m: min % 60 });
+    return T('{d}d {h}h', { d: Math.floor(min / 1440), h: Math.floor((min % 1440) / 60) });
+  }
+  function paceLabel(diff) {
+    return Math.abs(diff) < 3 ? T('On pace') : diff > 0 ? T('{n}% over pace', { n: diff }) : T('{n}% under pace', { n: -diff });
   }
   function fmtTokens(m) { return m >= 10 ? Math.round(m) + 'M' : m.toFixed(1) + 'M'; }
 
@@ -19,12 +22,12 @@
     var pace = Math.round((1 - left / m.win) * 100); // where even usage would be right now
     var diff = m.used - pace;
     var hot = m.used >= 85;
-    var paceText = Math.abs(diff) < 3 ? 'On pace' : diff > 0 ? diff + '% over pace' : -diff + '% under pace';
+    var paceText = paceLabel(diff);
     return '<div class="ag-meter' + (hot ? ' is-hot' : '') + '">' +
       '<div class="ag-meter-top"><span class="ag-label">' + m.label + '</span>' +
       '<span class="ag-pct num">' + m.used + '<small>%</small></span></div>' +
-      '<div class="ag-bar"><i style="width:' + m.used + '%"></i><em data-pace-mark style="left:' + pace + '%" title="Even pace"></em></div>' +
-      '<div class="ag-meter-foot" data-meter="' + ai + ',' + mi + '"><span>' + (m.detail ? m.detail + ' · ' : '') + 'Resets in <b data-reset>' + fmtLeft(left) + '</b></span>' +
+      '<div class="ag-bar"><i style="width:' + m.used + '%"></i><em data-pace-mark style="left:' + pace + '%" title="' + T('Even pace') + '"></em></div>' +
+      '<div class="ag-meter-foot" data-meter="' + ai + ',' + mi + '"><span>' + (m.detail ? m.detail + ' · ' : '') + T('Resets in {t}', { t: '<b data-reset>' + fmtLeft(left) + '</b>' }) + '</span>' +
       '<span class="ag-pace' + (diff >= 3 ? ' is-over' : '') + '" data-pace>' + paceText + '</span></div>' +
       '</div>';
   }
@@ -40,14 +43,14 @@
   function card(a) {
     var hot = a.meters.some(function (m) { return m.used >= 85; });
     var status = a.status === 'ok'
-      ? '<span class="ag-status"><i></i>Operational</span>'
-      : '<span class="ag-status is-warn"><i></i>Degraded</span>';
+      ? '<span class="ag-status"><i></i>' + T('Operational') + '</span>'
+      : '<span class="ag-status is-warn"><i></i>' + T('Degraded') + '</span>';
     return '<section class="ag-card" style="' + pstyle(a) + '">' +
       '<header class="ag-head"><div class="ag-id"><i class="ag-swatch"></i><b>' + a.name + '</b><span class="ag-plan">' + a.plan + '</span></div>' + status + '</header>' +
-      (a.incident ? '<div class="ag-incident">' + App.icon('bolt', 16) + a.incident + '</div>' : hot ? '<div class="ag-incident ag-incident--hot">' + App.icon('clock', 16) + 'Near the session limit</div>' : '') +
+      (a.incident ? '<div class="ag-incident">' + App.icon('bolt', 16) + a.incident + '</div>' : hot ? '<div class="ag-incident ag-incident--hot">' + App.icon('clock', 16) + T('Near the session limit') + '</div>' : '') +
       a.meters.map(function (m, mi) { return meter(m, D.agents.indexOf(a), mi); }).join('') +
-      '<footer class="ag-foot"><div><span class="num">' + fmtTokens(a.tokens) + '</span><small>tokens today</small></div>' +
-      '<div><span class="num">' + (a.cost ? '$' + a.cost.toFixed(2) : 'Incl.') + '</span><small>' + (a.cost ? 'API cost' : 'in plan') + '</small></div>' +
+      '<footer class="ag-foot"><div><span class="num">' + fmtTokens(a.tokens) + '</span><small>' + T('tokens today') + '</small></div>' +
+      '<div><span class="num">' + (a.cost ? '$' + a.cost.toFixed(2) : T('Incl.')) + '</span><small>' + (a.cost ? T('API cost') : T('in plan')) + '</small></div>' +
       spark(a.week) + '</footer>' +
       '</section>';
   }
@@ -64,12 +67,12 @@
       var d = App.addDays(now, i - 6);
       return '<div class="ag-col' + (i === 6 ? ' is-today' : '') + '"><div class="ag-stack" style="height:' + (t / max * 100) + '%">' +
         D.agents.map(function (a) { return '<i style="' + pstyle(a) + ';flex-grow:' + a.week[i] + '"></i>'; }).join('') +
-        '</div><span>' + (i === 6 ? 'Today' : App.fmt.dayShort(d)) + '</span></div>';
+        '</div><span>' + (i === 6 ? T('Today') : App.fmt.dayShort(d)) + '</span></div>';
     }).join('');
     return '<section class="ag-card ag-sum">' +
-      '<header class="ag-head"><div class="ag-id"><b>All agents</b><span class="ag-plan">Last 7 days</span></div></header>' +
-      '<div class="ag-sum-stats"><div><span class="num">' + fmtTokens(week) + '</span><small>tokens</small></div>' +
-      '<div><span class="num">$' + cost.toFixed(0) + '</span><small>API cost today</small></div></div>' +
+      '<header class="ag-head"><div class="ag-id"><b>' + T('All agents') + '</b><span class="ag-plan">' + T('Last 7 days') + '</span></div></header>' +
+      '<div class="ag-sum-stats"><div><span class="num">' + fmtTokens(week) + '</span><small>' + T('tokens') + '</small></div>' +
+      '<div><span class="num">$' + cost.toFixed(0) + '</span><small>' + T('API cost today') + '</small></div></div>' +
       '<div class="ag-chart">' + bars + '</div>' +
       '<div class="ag-legend">' + D.agents.map(function (a) { return '<span style="' + pstyle(a) + '"><i></i>' + a.name + '</span>'; }).join('') + '</div>' +
       '</section>';
@@ -77,7 +80,7 @@
 
   function paceOf(m) {
     var left = minsLeft(m), pace = Math.round((1 - left / m.win) * 100), diff = m.used - pace;
-    return { left: left, pace: pace, diff: diff, text: Math.abs(diff) < 3 ? 'On pace' : diff > 0 ? diff + '% over pace' : -diff + '% under pace' };
+    return { left: left, pace: pace, diff: diff, text: paceLabel(diff) };
   }
   // Minute tick: update countdown + pace text in place (no rebuild, so switching here stays instant).
   function tick() {
@@ -96,14 +99,14 @@
 
   function synced() {
     var m = Math.round((Date.now() - V.synced) / 60000);
-    return m < 1 ? 'Updated just now' : 'Updated ' + m + ' min ago';
+    return m < 1 ? T('Updated just now') : T('Updated {n} min ago', { n: m });
   }
 
   function render() {
     V.el.innerHTML = '<div class="agents">' +
-      '<header class="ag-top"><div><div class="label">AI plans · usage limits</div><h1 class="serif">Agents</h1></div>' +
+      '<header class="ag-top"><div><div class="label">' + T('AI plans · usage limits') + '</div><h1 class="serif">' + T('Agents') + '</h1></div>' +
       '<div class="ag-sync"><span class="label">' + synced() + '</span>' +
-      '<button class="icon-btn" data-refresh aria-label="Refresh">' + App.icon('undo', 26) + '</button></div></header>' +
+      '<button class="icon-btn" data-refresh aria-label="' + T('Refresh') + '">' + App.icon('undo', 26) + '</button></div></header>' +
       '<div class="ag-grid">' + D.agents.map(card).join('') + summary() + '</div>' +
       '</div>';
   }

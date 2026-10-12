@@ -38,6 +38,14 @@ It is a Vite web app deployed to Cloudflare Workers, plus `dashboard/kiosk/`: a 
 WebView Android app, built without Gradle, that shows it. Hold two fingers still for 1.5 s to
 exit to the launcher.
 
+The dashboard is translated: English and French ship in the box. Tap the language code
+(`EN` / `FR`) at the bottom of the sidebar to switch; the choice is remembered on the device, and
+the first load follows the browser language. To add a language, copy
+[`dashboard/js/locales/fr.js`](dashboard/js/locales/fr.js) to `js/locales/<code>.js`, translate the
+values (the keys are the English strings, and anything you skip falls back to English), set its
+`meta` (day and month names, 24-hour clock, date order, decimal separator), then add one `import`
+line for it in `dashboard/js/main.js`.
+
 Each is a record of **one unit**. Frames sold under the same name can have different boards
 and firmware. These are not universal flashing guides.
 

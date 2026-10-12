@@ -27,30 +27,30 @@
   App.doorbell = function () {
     var now = App.now();
     var el = takeover(
-      '<div class="tk-cam"><img src="' + img('visitor-porch', 1280, 800) + '" alt=""><span class="tk-live"><i></i>LIVE · Front Porch</span></div>' +
+      '<div class="tk-cam"><img src="' + img('visitor-porch', 1280, 800) + '" alt=""><span class="tk-live"><i></i>' + T('LIVE · {cam}', { cam: T('Front Porch') }) + '</span></div>' +
       '<div class="tk-door">' +
-      '  <div class="label label--light">' + App.icon('bell', 20) + ' Doorbell · ' + App.fmt.time(now) + '</div>' +
-      '  <h1 class="serif tk-title">Someone’s at<br>the front door</h1>' +
+      '  <div class="label label--light">' + App.icon('bell', 20) + ' ' + T('Doorbell') + ' · ' + App.fmt.time(now) + '</div>' +
+      '  <h1 class="serif tk-title">' + T('Someone’s at<br>the front door') + '</h1>' +
       '  <div class="tk-actions">' +
-      '    <button class="tk-btn" data-talk>' + App.icon('mic', 30) + '<span>Talk</span></button>' +
-      '    <button class="tk-btn tk-btn--hold" data-unlock>' + App.icon('unlock', 30) + '<span>Hold to unlock</span></button>' +
-      '    <button class="tk-btn tk-btn--solid" data-dismiss>' + App.icon('x', 30) + '<span>Dismiss</span></button>' +
+      '    <button class="tk-btn" data-talk>' + App.icon('mic', 30) + '<span>' + T('Talk') + '</span></button>' +
+      '    <button class="tk-btn tk-btn--hold" data-unlock>' + App.icon('unlock', 30) + '<span>' + T('Hold to unlock') + '</span></button>' +
+      '    <button class="tk-btn tk-btn--solid" data-dismiss>' + App.icon('x', 30) + '<span>' + T('Dismiss') + '</span></button>' +
       '  </div>' +
       '</div>', 'takeover--door');
     el.querySelector('[data-dismiss]').onclick = function () { clearTimeout(doorbellTimer); closeTakeover(); };
     el.querySelector('[data-talk]').onclick = function () {
       this.classList.toggle('is-on');
-      this.querySelector('span').textContent = this.classList.contains('is-on') ? 'Talking…' : 'Talk';
+      this.querySelector('span').textContent = this.classList.contains('is-on') ? T('Talking…') : T('Talk');
     };
     var u = el.querySelector('[data-unlock]');
     App.hold(u, 1000, {
       done: function () {
         App.setDevice('e-door', { locked: false });
         u.classList.add('is-on');
-        u.querySelector('span').textContent = 'Unlocked';
-        App.toast('Front door unlocked · relocks in 2 min', { icon: 'unlock' });
+        u.querySelector('span').textContent = T('Unlocked');
+        App.toast(T('Front door unlocked · relocks in 2 min'), { icon: 'unlock' });
       },
-      cancel: function () { App.toast('Keep holding to unlock', { ms: 2000, icon: 'lock' }); }
+      cancel: function () { App.toast(T('Keep holding to unlock'), { ms: 2000, icon: 'lock' }); }
     });
     clearTimeout(doorbellTimer);
     doorbellTimer = setTimeout(closeTakeover, 45000);
@@ -61,22 +61,22 @@
     var el = takeover(
       '<div class="tk-alarm">' +
       '  <div class="tk-alarm-icon">' + App.icon('drop', 88) + '</div>' +
-      '  <div class="label label--light">Critical alert · ' + App.fmt.time(now) + '</div>' +
-      '  <h1 class="tk-huge">Water leak</h1>' +
-      '  <p class="tk-sub">Laundry room sensor detected water on the floor.</p>' +
+      '  <div class="label label--light">' + T('Critical alert') + ' · ' + App.fmt.time(now) + '</div>' +
+      '  <h1 class="tk-huge">' + T('Water leak') + '</h1>' +
+      '  <p class="tk-sub">' + T('Laundry room sensor detected water on the floor.') + '</p>' +
       '  <div class="tk-actions">' +
-      '    <button class="tk-btn tk-btn--hold tk-btn--light" data-valve>' + App.icon('drop', 30) + '<span>Hold to shut off water</span></button>' +
-      '    <button class="tk-btn tk-btn--solid tk-btn--light" data-ack>' + App.icon('check', 30) + '<span>Acknowledge</span></button>' +
+      '    <button class="tk-btn tk-btn--hold tk-btn--light" data-valve>' + App.icon('drop', 30) + '<span>' + T('Hold to shut off water') + '</span></button>' +
+      '    <button class="tk-btn tk-btn--solid tk-btn--light" data-ack>' + App.icon('check', 30) + '<span>' + T('Acknowledge') + '</span></button>' +
       '  </div>' +
       '</div>', 'takeover--alarm');
     var v = el.querySelector('[data-valve]');
     App.hold(v, 1200, {
-      done: function () { v.classList.add('is-on'); v.querySelector('span').textContent = 'Water main closed'; },
-      cancel: function () { App.toast('Keep holding to shut off the water main', { ms: 2000, icon: 'drop' }); }
+      done: function () { v.classList.add('is-on'); v.querySelector('span').textContent = T('Water main closed'); },
+      cancel: function () { App.toast(T('Keep holding to shut off the water main'), { ms: 2000, icon: 'drop' }); }
     });
     el.querySelector('[data-ack]').onclick = function () {
       closeTakeover();
-      App.toast('Leak acknowledged by the kitchen display', { icon: 'check' });
+      App.toast(T('Leak acknowledged by the kitchen display'), { icon: 'check' });
     };
   };
 
@@ -87,7 +87,7 @@
     b.className = 'banner banner--' + (opts.tone || 'amber');
     b.innerHTML = App.icon(opts.icon || 'bell', 30) + '<div class="banner-text"><b>' + opts.title + '</b><span>' + (opts.sub || '') + '</span></div>' +
       (opts.action ? '<button class="banner-btn banner-btn--solid" data-act>' + opts.action + '</button>' : '') +
-      '<button class="banner-btn" data-x>' + (opts.dismiss || 'Dismiss') + '</button>';
+      '<button class="banner-btn" data-x>' + (opts.dismiss || T('Dismiss')) + '</button>';
     box.appendChild(b);
     b.classList.add('is-in');
     function kill() { b.remove(); }
@@ -100,16 +100,16 @@
   App.garageOpenAlert = function () {
     App.setDevice('g-door', { state: 'open' });
     App.banner({
-      icon: 'garage', title: 'Garage open for 15 min', sub: 'No one is in the garage · Wes is 12 min away',
-      action: 'Close garage', dismiss: 'Leave open',
+      icon: 'garage', title: T('Garage open for 15 min'), sub: T('No one is in the garage · {name} is {n} min away', { name: 'Wes', n: 12 }),
+      action: T('Close garage'), dismiss: T('Leave open'),
       onAction: function () { App.openGarageSheet(); }
     });
   };
 
   App.packageNotice = function () {
     App.banner({
-      tone: 'ink', icon: 'box', title: 'Package delivered', sub: 'Front porch · ' + App.fmt.time(App.now()),
-      action: 'View camera', dismiss: 'OK', ms: 9000,
+      tone: 'ink', icon: 'box', title: T('Package delivered'), sub: T('Front porch') + ' · ' + App.fmt.time(App.now()),
+      action: T('View camera'), dismiss: T('OK'), ms: 9000,
       onAction: function () { App.cameraSheet(D.cameras[0]); }
     });
   };
@@ -118,18 +118,18 @@
   function demoHTML() {
     var t = App.now();
     return '<div class="demo-panel">' +
-      '<div class="demo-head"><div><div class="label label--light">Prototype</div><h2 class="serif">Demo controls</h2></div><button class="demo-x" data-demo-close>' + App.icon('x', 28) + '</button></div>' +
-      '<div class="demo-sec"><div class="label label--light">Time of day · now ' + App.fmt.time(t) + '</div><div class="demo-grid">' +
-      '<button data-time="7:10">7:10 AM</button><button data-time="15:18">3:18 PM</button><button data-time="19:45">7:45 PM</button><button data-time="23:40">11:40 PM</button><button data-time="real">Real time</button></div></div>' +
-      '<div class="demo-sec"><div class="label label--light">Modes</div><div class="demo-grid">' +
-      '<button data-mode="ambient">Ambient</button><button data-mode="night">Night</button><button data-fastidle>' + (App.idle.home < 60 ? 'Idle: fast ✓' : 'Idle: fast') + '</button></div></div>' +
-      '<div class="demo-sec"><div class="label label--light">Alerts</div><div class="demo-grid">' +
-      '<button data-alert="doorbell">Doorbell</button><button data-alert="leak">Water leak</button><button data-alert="garage">Garage open</button><button data-alert="package">Package</button></div></div>' +
-      '<div class="demo-sec"><div class="label label--light">Calendar data</div><div class="demo-grid">' +
+      '<div class="demo-head"><div><div class="label label--light">' + T('Prototype') + '</div><h2 class="serif">' + T('Demo controls') + '</h2></div><button class="demo-x" data-demo-close>' + App.icon('x', 28) + '</button></div>' +
+      '<div class="demo-sec"><div class="label label--light">' + T('Time of day · now {t}', { t: App.fmt.time(t) }) + '</div><div class="demo-grid">' +
+      [[7, 10], [15, 18], [19, 45], [23, 40]].map(function (x) { return '<button data-time="' + x[0] + ':' + x[1] + '">' + App.fmt.time(new Date(2000, 0, 1, x[0], x[1])) + '</button>'; }).join('') + '<button data-time="real">' + T('Real time') + '</button></div></div>' +
+      '<div class="demo-sec"><div class="label label--light">' + T('Modes') + '</div><div class="demo-grid">' +
+      '<button data-mode="ambient">' + T('Ambient') + '</button><button data-mode="night">' + T('Night') + '</button><button data-fastidle>' + (App.idle.home < 60 ? T('Idle: fast ✓') : T('Idle: fast')) + '</button></div></div>' +
+      '<div class="demo-sec"><div class="label label--light">' + T('Alerts') + '</div><div class="demo-grid">' +
+      '<button data-alert="doorbell">' + T('Doorbell') + '</button><button data-alert="leak">' + T('Water leak') + '</button><button data-alert="garage">' + T('Garage open') + '</button><button data-alert="package">' + T('Package') + '</button></div></div>' +
+      '<div class="demo-sec"><div class="label label--light">' + T('Calendar data') + '</div><div class="demo-grid">' +
       ['normal', 'empty', 'busy'].map(function (m) {
-        return '<button data-cal="' + m + '" class="' + (App.calMode === m ? 'is-on' : '') + '">' + { normal: 'Normal day', empty: 'Empty day', busy: 'Overloaded' }[m] + '</button>';
+        return '<button data-cal="' + m + '" class="' + (App.calMode === m ? 'is-on' : '') + '">' + { normal: T('Normal day'), empty: T('Empty day'), busy: T('Overloaded') }[m] + '</button>';
       }).join('') + '</div></div>' +
-      '<p class="demo-note">Keyboard: <b>D</b> demo · <b>A</b> ambient · <b>N</b> night · <b>1–7</b> views</p>' +
+      '<p class="demo-note">' + T('Keyboard: <b>D</b> demo · <b>A</b> ambient · <b>N</b> night · <b>1–7</b> views') + '</p>' +
       '</div>';
   }
   App.openDemo = function () {

@@ -7,7 +7,7 @@
   function ambientInfo() {
     var n = App.now(), w = App.weatherNow(), next = App.nextEvent();
     return '<div class="amb-clock"><div class="amb-time num">' + App.fmt.time(n, false) + '</div>' +
-      '<div class="amb-date">' + App.fmt.day(n) + ', ' + App.fmt.month(n) + ' ' + n.getDate() + '</div></div>' +
+      '<div class="amb-date">' + App.fmt.day(n) + ', ' + App.fmt.monthDay(n) + '</div></div>' +
       '<div class="amb-right">' +
       '<div class="amb-wx">' + App.icon(w.cond, 44) + '<span class="num">' + w.temp + '°</span><small>' + w.summary + '</small></div>' +
       (next ? '<div class="amb-next" style="' + App.pstyle(App.evColor(next)) + '"><i></i>' + App.esc(next.title) + ' · ' + App.fmt.time(next.start) + '</div>' : '') +
@@ -18,8 +18,8 @@
     var n = App.now(), tomorrow = App.addDays(n, n.getHours() < 6 ? 0 : 1);
     var first = App.timedOn(tomorrow)[0], w = App.weatherNow();
     return '<div class="nt-time num">' + App.fmt.time(n, false) + '</div>' +
-      '<div class="nt-line">' + App.icon(w.cond, 26) + ' ' + w.temp + '° · ' + (first ? 'First up ' + App.fmt.rel(first.start).toLowerCase() + ': <b>' + App.esc(first.title) + '</b> ' + App.fmt.time(first.start) + ' · ' + App.person(first.people[0]).name : 'Nothing early tomorrow') + '</div>' +
-      '<div class="nt-lock">' + App.icon('lock', 20) + ' House locked · alarm armed</div>';
+      '<div class="nt-line">' + App.icon(w.cond, 26) + ' ' + w.temp + '° · ' + (first ? T('First up {when}: {title} {t}', { when: App.fmt.rel(first.start).toLowerCase(), title: '<b>' + App.esc(first.title) + '</b>', t: App.fmt.time(first.start) }) + ' · ' + App.person(first.people[0]).name : T('Nothing early tomorrow')) + '</div>' +
+      '<div class="nt-lock">' + App.icon('lock', 20) + ' ' + T('House locked · alarm armed') + '</div>';
   }
 
   function paint() {

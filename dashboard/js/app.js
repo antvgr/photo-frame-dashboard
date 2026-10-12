@@ -26,41 +26,51 @@
   App.sameDay = function (a, b) { return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate(); };
   App.isNight = function () { var h = App.now().getHours(); return h >= 22 || h < 6; };
 
-  var DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-  var MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-  var MON_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'June', 'July', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'];
+  var M = I18N.meta;
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
   App.fmt = {
     time: function (d, ampm) {
       var h = d.getHours(), m = d.getMinutes();
-      var s = (h % 12 || 12) + ':' + (m < 10 ? '0' : '') + m;
+      if (M.clock24) return pad(h) + ':' + pad(m);
+      var s = (h % 12 || 12) + ':' + pad(m);
       return ampm === false ? s : s + ' ' + (h >= 12 ? 'PM' : 'AM');
     },
-    // "4 PM", "3:45 PM"
+    // "4 PM", "3:45 PM" (24-hour locales: "16 h", "15 h 45")
     hour: function (d) {
       var h = d.getHours(), m = d.getMinutes();
-      return (h % 12 || 12) + (m ? ':' + (m < 10 ? '0' : '') + m : '') + ' ' + (h >= 12 ? 'PM' : 'AM');
+      if (M.clock24) return h + ' h' + (m ? ' ' + pad(m) : '');
+      return (h % 12 || 12) + (m ? ':' + pad(m) : '') + ' ' + (h >= 12 ? 'PM' : 'AM');
     },
-    ampm: function (d) { return d.getHours() >= 12 ? 'PM' : 'AM'; },
+    // Hour-of-day label for the hourly forecast: "3p" / "15 h"
+    hourShort: function (x) { return M.clock24 ? x + ' h' : (x % 12 || 12) + (x >= 12 ? 'p' : 'a'); },
+    ampm: function (d) { return M.clock24 ? '' : d.getHours() >= 12 ? 'PM' : 'AM'; },
     range: function (a, b) {
-      var same = App.fmt.ampm(a) === App.fmt.ampm(b);
+      var same = M.clock24 || App.fmt.ampm(a) === App.fmt.ampm(b);
       return (same ? App.fmt.time(a, false) : App.fmt.time(a)) + ' – ' + App.fmt.time(b);
     },
-    day: function (d) { return DAYS[d.getDay()]; },
-    dayShort: function (d) { return DAYS[d.getDay()].slice(0, 3); },
-    month: function (d) { return MONTHS[d.getMonth()]; },
-    monthShort: function (d) { return MON_SHORT[d.getMonth()]; },
+    day: function (d) { return M.days[d.getDay()]; },
+    dayShort: function (d) { return M.daysShort[d.getDay()]; },
+    month: function (d) { return M.months[d.getMonth()]; },
+    monthShort: function (d) { return M.monthsShort[d.getMonth()]; },
+    // "Oct 12" / "12 oct."
+    monthDay: function (d) { return M.dayFirst ? d.getDate() + ' ' + App.fmt.month(d) : App.fmt.month(d) + ' ' + d.getDate(); },
+    monthDayShort: function (d) { return M.dayFirst ? d.getDate() + ' ' + App.fmt.monthShort(d) : App.fmt.monthShort(d) + ' ' + d.getDate(); },
+    // "October 12, 2025" / "12 octobre 2025"
+    fullDate: function (d) { return M.dayFirst ? App.fmt.monthDay(d) + ' ' + d.getFullYear() : App.fmt.monthDay(d) + ', ' + d.getFullYear(); },
+    // Decimal separator: 20.5 → "20,5" in French
+    num: function (x) { return String(x).replace('.', M.decimal); },
     mins: function (m) {
       m = Math.max(0, Math.round(m));
-      if (m < 60) return m + ' min';
+      if (m < 60) return T('{n} min', { n: m });
       var h = Math.floor(m / 60), r = m % 60;
-      return h + ' hr' + (r ? ' ' + r + ' min' : '');
+      return r ? T('{h} hr {m} min', { h: h, m: r }) : T('{h} hr', { h: h });
     },
     rel: function (d) {
       var t = App.dayStart(App.now()), x = App.dayStart(d), diff = Math.round((x - t) / 864e5);
-      if (diff === 0) return 'Today';
-      if (diff === 1) return 'Tomorrow';
-      if (diff === -1) return 'Yesterday';
-      return DAYS[d.getDay()];
+      if (diff === 0) return T('Today');
+      if (diff === 1) return T('Tomorrow');
+      if (diff === -1) return T('Yesterday');
+      return M.days[d.getDay()];
     }
   };
   App.esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
@@ -135,24 +145,24 @@
     var summary, advice;
     if (rainAt === h) {
       var stop = h; while (stop < 24 && W.p[stop] >= 50) stop++;
-      summary = 'Rain until ' + App.fmt.hour(new Date(2000, 0, 1, stop));
-      advice = 'Umbrella weather';
+      summary = T('Rain until {t}', { t: App.fmt.hour(new Date(2000, 0, 1, stop)) });
+      advice = T('Umbrella weather');
     } else if (rainAt > -1) {
-      summary = 'Rain from ' + App.fmt.hour(new Date(2000, 0, 1, rainAt));
-      var soccer = App.timedOn(App.now()).filter(function (e) { return /soccer/i.test(e.title) && e.start > App.now(); })[0];
-      advice = soccer ? 'Pack a rain jacket for soccer' : 'Grab a rain jacket';
+      summary = T('Rain from {t}', { t: App.fmt.hour(new Date(2000, 0, 1, rainAt)) });
+      var soccer = App.timedOn(App.now()).filter(function (e) { return /soccer|foot/i.test(e.title) && e.start > App.now(); })[0];
+      advice = soccer ? T('Pack a rain jacket for soccer') : T('Grab a rain jacket');
     } else {
-      summary = W.t[h] < 12 ? 'Clear and cool' : 'Dry all day';
-      advice = W.t[h] < 12 ? 'Jacket weather' : 'Light layers';
+      summary = W.t[h] < 12 ? T('Clear and cool') : T('Dry all day');
+      advice = W.t[h] < 12 ? T('Jacket weather') : T('Light layers');
     }
-    var labels = { sun: 'Sunny', moon: 'Clear', partly: 'Partly cloudy', cloud: 'Overcast', rain: 'Rain' };
+    var labels = { sun: T('Sunny'), moon: T('Clear'), partly: T('Partly cloudy'), cloud: T('Overcast'), rain: T('Rain') };
     return { temp: W.t[h], cond: W.c[h], label: labels[W.c[h]], hi: W.hi, lo: W.lo, summary: summary, advice: advice, hour: h };
   };
   App.hourly = function (count) {
     var W = D.weather, h = App.now().getHours(), out = [];
     for (var i = 0; i < count; i++) {
       var x = (h + i) % 24;
-      out.push({ h: x, t: W.t[x], c: W.c[x], p: W.p[x], label: i === 0 ? 'Now' : ((x % 12 || 12) + (x >= 12 ? 'p' : 'a')) });
+      out.push({ h: x, t: W.t[x], c: W.c[x], p: W.p[x], label: i === 0 ? T('Now') : App.fmt.hourShort(x) });
     }
     return out;
   };
@@ -226,7 +236,7 @@
     t.className = 'toast' + (opts.tone ? ' toast--' + opts.tone : '');
     t.style.setProperty('--ms', ms + 'ms');
     t.innerHTML = (opts.icon ? App.icon(opts.icon, 26) : '') + '<span class="toast-msg">' + html + '</span>' +
-      (opts.undo ? '<button class="toast-undo">' + App.icon('undo', 22) + 'Undo</button>' : '');
+      (opts.undo ? '<button class="toast-undo">' + App.icon('undo', 22) + T('Undo') + '</button>' : '');
     box.appendChild(t);
     t.classList.add('is-in');
     function kill() { t.remove(); }
@@ -239,7 +249,7 @@
     opts = opts || {};
     var layer = $('#sheetLayer');
     layer.innerHTML = '<div class="sheet-scrim"></div><div class="sheet ' + (opts.cls || '') + '">' +
-      '<button class="sheet-x" data-close aria-label="Close">' + App.icon('x', 28) + '</button>' + html + '</div>';
+      '<button class="sheet-x" data-close aria-label="' + T('Close') + '">' + App.icon('x', 28) + '</button>' + html + '</div>';
     layer.classList.add('is-open');
     function close() {
       if (!layer.classList.contains('is-open')) return;
@@ -259,6 +269,22 @@
   App.centerOf = function (el) {
     var stage = $('#stage').getBoundingClientRect(), r = el.getBoundingClientRect(), k = stage.width / 1280;
     return { x: (r.left + r.width / 2 - stage.left) / k, y: (r.top + r.height / 2 - stage.top) / k };
+  };
+
+  // ------------------------------------------------------------ language picker
+  // Languages are whatever js/locales/*.js registered; picking one reloads the page in that language.
+  App.languageSheet = function () {
+    App.sheet('<div class="sheet-pad"><div class="label">' + T('Language') + '</div><h2 class="serif sheet-h">' + T('Choose a language') + '</h2>' +
+      '<div class="lang-list">' + I18N.list().map(function (l) {
+        return '<button class="lang-btn' + (l.code === I18N.lang ? ' is-on' : '') + '" data-lang="' + l.code + '"><b>' + App.esc(l.name) + '</b><span>' + l.code.toUpperCase() + '</span></button>';
+      }).join('') + '</div></div>', {
+      onMount: function (s) {
+        s.addEventListener('click', function (e) {
+          var b = e.target.closest('[data-lang]');
+          if (b) I18N.setLang(b.dataset.lang);
+        });
+      }
+    });
   };
 
   // ------------------------------------------------------------ press-and-hold
@@ -342,12 +368,15 @@
     });
     document.addEventListener('pointerdown', App.resetIdle, true);
     window.addEventListener('hashchange', function () { App.go(location.hash.slice(1)); });
+    var lb = $('#railLang');
+    lb.textContent = I18N.lang;
+    lb.addEventListener('click', App.languageSheet);
     App.go(location.hash.slice(1) || 'home');
     tick();
     setInterval(tick, 1000);
     App.emit('ready');
     refreshStale(1500);
-    setTimeout(function () { App.toast('Tip: press and hold the <b>clock</b> in the sidebar for demo controls', { ms: 6000, icon: 'bolt' }); }, 1200);
+    setTimeout(function () { App.toast(T('Tip: press and hold the <b>clock</b> in the sidebar for demo controls'), { ms: 6000, icon: 'bolt' }); }, 1200);
   };
   document.addEventListener('DOMContentLoaded', function () { App.start(); });
 })();
