@@ -1,4 +1,7 @@
 // Entry point. Order matters: each module attaches to the shared window.App.
+import './i18n.js';
+import './locales/fr.js';
+import './i18n-init.js';
 import './icons.js';
 import './data.js';
 import './app.js';

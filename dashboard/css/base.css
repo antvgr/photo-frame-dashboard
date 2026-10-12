@@ -68,7 +68,13 @@ ul { margin: 0; padding: 0; list-style: none; }
 .rail-item.is-active { background: var(--ink); color: var(--paper); }
 .rail-item:active { background: var(--paper-2); }
 .rail-item.is-active:active { background: var(--ink-2); }
-.rail-clock { margin-top: auto; padding: 10px 0; text-align: center; line-height: 1; position: relative; overflow: hidden; }
+.rail-lang {
+  margin-top: auto; height: 40px; width: 100%;
+  font-size: 12px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--mute);
+  border-top: 2px solid var(--line);
+}
+.rail-lang:active { background: var(--paper-2); }
+.rail-clock { margin-top: 0; padding: 10px 0; text-align: center; line-height: 1; position: relative; overflow: hidden; }
 .rail-clock.is-holding { background: var(--paper-2); }
 .rail-clock b { display: block; font-size: 24px; font-weight: 800; font-stretch: 62%; font-variant-numeric: tabular-nums; }
 .rail-clock span { font-size: 12px; font-weight: 700; letter-spacing: .1em; color: var(--mute); }
@@ -205,6 +211,15 @@ button.card:active, .h-hero:active, .h-photo:active { transform: scale(.985); }
 .sheet-pad { padding: 34px 36px 32px; }
 .sheet-h { font-size: 52px; line-height: 1; margin: 6px 0 22px; }
 .sheet-p { font-size: 20px; color: var(--ink-2); margin: -8px 0 24px; }
+.lang-list { display: flex; flex-direction: column; gap: 12px; }
+.lang-btn {
+  display: flex; align-items: center; justify-content: space-between;
+  min-height: var(--tap); padding: 0 24px; border-radius: var(--r); border: 2px solid var(--line);
+  font-size: 28px; font-weight: 700;
+}
+.lang-btn span { font-size: 14px; letter-spacing: .12em; color: var(--mute); }
+.lang-btn.is-on { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.lang-btn.is-on span { color: inherit; }
 .sheet-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 26px; }
 
 /* ---------------------------------------------------------------- banners */

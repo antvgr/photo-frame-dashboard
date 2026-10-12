@@ -15,9 +15,9 @@
     var d = parseDate(p), now = App.now();
     var years = now.getFullYear() - d.getFullYear();
     var onThisDay = d.getMonth() === now.getMonth() && d.getDate() === now.getDate();
-    var kicker = onThisDay ? years + (years === 1 ? ' year' : ' years') + ' ago today' : (years > 0 ? years + (years === 1 ? ' year ago' : ' years ago') : 'This year');
+    var kicker = onThisDay ? T(years === 1 ? '{n} year ago today' : '{n} years ago today', { n: years }) : (years > 0 ? T(years === 1 ? '{n} year ago' : '{n} years ago', { n: years }) : T('This year'));
     return {
-      date: App.fmt.month(d) + ' ' + d.getDate() + ', ' + d.getFullYear(),
+      date: App.fmt.fullDate(d),
       monthYear: App.fmt.month(d) + ' ' + d.getFullYear(),
       kicker: kicker, onThisDay: onThisDay, place: p.place, from: App.person(p.from)
     };
@@ -31,7 +31,7 @@
   function caption(ps, size) {
     var m = App.photoMeta(ps[0]);
     return '<div class="cap cap--' + (size || 'l') + '">' +
-      '<div class="cap-kicker">' + (m.onThisDay ? '<b>On this day</b> · ' : '') + m.kicker + ' · ' + App.esc(m.place) + '</div>' +
+      '<div class="cap-kicker">' + (m.onThisDay ? '<b>' + T('On this day') + '</b> · ' : '') + m.kicker + ' · ' + App.esc(m.place) + '</div>' +
       '<div class="cap-date serif">' + (ps.length > 1 ? m.monthYear : m.date) + '</div>' +
       '</div>';
   }

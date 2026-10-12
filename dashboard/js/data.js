@@ -337,6 +337,34 @@ window.DATA = (function () {
     }
   ];
 
+  // ---------------------------------------------------------------- localisation
+  // Mock data is written in English; run the display strings through the active locale once, at load.
+  (function () {
+    function tr(list, fields) {
+      list.forEach(function (o) { fields.forEach(function (f) { if (o[f]) o[f] = T(o[f]); }); });
+    }
+    family.name = T(family.name);
+    tr(people, ['status']);
+    tr(events, ['title', 'loc', 'notes']);
+    tr(busyExtras, ['title', 'loc', 'notes']);
+    tr(routines, ['name', 'range']);
+    tr(chores, ['title']);
+    tr(groceries, ['name', 'cat', 'note']);
+    catalog.forEach(function (c) { c[0] = T(c[0]); c[1] = T(c[1]); });
+    Object.keys(catOrder).forEach(function (k) { catOrder[k] = catOrder[k].map(function (c) { return T(c); }); });
+    usuals.forEach(function (u, i) { usuals[i] = T(u); });
+    tr(rooms, ['name']);
+    tr(devices, ['name']);
+    tr(scenes, ['name']);
+    tr(cameras, ['name']);
+    tr(photos, ['place']);
+    media.room = T(media.room);
+    agents.forEach(function (a) {
+      if (a.incident) a.incident = T(a.incident);
+      tr(a.meters, ['label', 'detail']);
+    });
+  })();
+
   return {
     people: people, family: family, ALL: ALL,
     events: events, busyExtras: busyExtras,
