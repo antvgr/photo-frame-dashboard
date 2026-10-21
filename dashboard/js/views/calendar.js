@@ -4,7 +4,7 @@
   var D = window.DATA;
   var PX = 72, START = 6, END = 23; // 72px per hour, 6 AM → 11 PM
   var V = { mode: 'day', date: null, el: null, scroll: null };
-  var MODES = [['day', T('Today')], ['3day', T('3 Day')], ['week', T('Week')], ['month', T('Month')]];
+  var MODES = [['day', 'Jour'], ['3day', '3 jours'], ['week', 'Semaine'], ['month', 'Mois']];
 
   function y(d) { return ((d.getHours() + d.getMinutes() / 60) - START) * PX; }
   function clampTop(e, day) {
@@ -96,9 +96,13 @@
       return '<button class="ad' + (e.start < s ? ' ad--cont' : '') + '" data-ev="' + e.id + '" style="grid-column:' + col + ';' + App.pstyle(App.evColor(e)) + '">' +
         (e.start < s ? App.icon('left', 16) : '') + App.esc(e.title) + (spanDays > 1 ? ' <small>' + T('Day {n} of {total}', { n: dayN, total: spanDays }) + '</small>' : '') + '</button>';
     }).join('') + '</div></div>' : '';
-    var grid = '<div class="grid-scroll"><div class="grid" style="height:' + (END - START) * PX + 'px">' +
+    var cols = 'grid-template-columns:repeat(' + D.people.length + ',minmax(0,1fr))';
+    var head = '<div class="lanes-head" style="grid-template-columns:64px repeat(' + D.people.length + ',minmax(0,1fr))"><div class="gutter"></div>' + D.people.map(function (p) {
+      return '<div class="lane-head" style="' + App.pstyle(p) + '">' + App.avatar(p, 40) + '<b>' + App.esc(p.name) + '</b><small>' + App.esc(p.status || (p.home ? 'Maison' : 'Absent')) + '</small></div>';
+    }).join('') + '</div>';
+    var grid = head + '<div class="grid-scroll"><div class="grid" style="height:' + (END - START) * PX + 'px">' +
       '<div class="hours">' + hoursCol() + '</div>' +
-      '<div class="lanes">' + D.people.map(function (p) {
+      '<div class="lanes" style="' + cols + '">' + D.people.map(function (p) {
         var list = App.timedOn(day, p.id).filter(function (e) { return !App.isFamily(e); });
         return '<div class="lane" style="' + App.pstyle(p) + '">' + placeBlocks(list, null, p.id) + '</div>';
       }).join('') +
@@ -144,11 +148,12 @@
     return '<div class="cal-day cal-3">' + head + ad + grid + '</div>';
   }
 
-  // ------------------------------------------------------------ rolling week
+  // ------------------------------------------------------------ calendar week (Monday to Sunday)
+  function monday(d) { var x = App.dayStart(d); return App.addDays(x, -((x.getDay() + 6) % 7)); }
   function weekView() {
-    var now = App.now();
+    var now = App.now(), first = monday(V.date);
     return '<div class="week">' + [0, 1, 2, 3, 4, 5, 6].map(function (i) {
-      var d = App.addDays(V.date, i), today = App.sameDay(d, now);
+      var d = App.addDays(first, i), today = App.sameDay(d, now);
       var ad = App.allDayOn(d), list = App.timedOn(d), max = 7 - ad.length, more = list.length - max;
       return '<div class="wk-col' + (today ? ' is-today' : '') + '" data-day="' + (+d) + '">' +
         '<div class="wk-head"><b>' + App.fmt.dayShort(d) + '</b><span class="num">' + d.getDate() + '</span></div>' +
@@ -185,20 +190,17 @@
     var d = V.date, now = App.now();
     if (V.mode === 'day') return { k: App.fmt.month(d) + ' ' + d.getFullYear() + (App.sameDay(d, now) ? ' · ' + T('Today') : ' · ' + App.fmt.rel(d)), t: App.fmt.day(d) + ' <i>' + d.getDate() + '</i>' };
     if (V.mode === '3day') { var e = App.addDays(d, 2); return { k: App.fmt.month(d) + ' ' + d.getFullYear(), t: App.fmt.dayShort(d) + ' ' + d.getDate() + ' <i>–</i> ' + App.fmt.dayShort(e) + ' ' + e.getDate() }; }
-    if (V.mode === 'week') { var w = App.addDays(d, 6); return { k: T('Next 7 days'), t: App.fmt.monthDayShort(d) + ' <i>–</i> ' + App.fmt.monthDayShort(w) }; }
+    if (V.mode === 'week') { d = monday(d); var w = App.addDays(d, 6); return { k: T('Week'), t: App.fmt.monthDayShort(d) + ' <i>–</i> ' + App.fmt.monthDayShort(w) }; }
     return { k: d.getFullYear(), t: App.fmt.month(d) };
   }
   function header() {
     var t = title();
     var isToday = V.mode === 'month' ? (V.date.getMonth() === App.now().getMonth()) : App.sameDay(V.date, App.now());
-    return '<header class="cal-head">' +
-      '<button class="icon-btn" data-nav="-1" aria-label="' + T('Previous') + '">' + App.icon('left', 24) + '</button>' +
-      '<div class="cal-title"><div class="serif">' + t.t + '</div><div class="label">' + t.k + '</div></div>' +
-      '<button class="icon-btn" data-nav="1" aria-label="' + T('Next') + '">' + App.icon('right', 24) + '</button>' +
-      '<button class="btn btn--ghost' + (isToday ? ' is-hidden' : '') + '" data-today>' + T('Today') + '</button>' +
-      '<div class="seg">' + MODES.map(function (m) { return '<button class="' + (V.mode === m[0] ? 'is-on' : '') + '" data-mode="' + m[0] + '">' + m[1] + '</button>'; }).join('') + '</div>' +
-      '<button class="fab" data-add aria-label="' + T('Add event') + '">' + App.icon('plus', 26) + '</button>' +
-      '</header>';
+    return App.topbar(t.t, t.k,
+      '<button class="btn' + (isToday ? ' is-hidden' : '') + '" data-today>' + T('Today') + '</button>' +
+      '<button class="icon-btn" data-nav="-1" aria-label="' + T('Previous') + '">' + App.icon('left', 20) + '</button>' +
+      '<button class="icon-btn" data-nav="1" aria-label="' + T('Next') + '">' + App.icon('right', 20) + '</button>' +
+      '<div class="seg">' + MODES.map(function (m) { return '<button class="' + (V.mode === m[0] ? 'is-on' : '') + '" data-mode="' + m[0] + '">' + m[1] + '</button>'; }).join('') + '</div>');
   }
 
   function render() {
@@ -232,7 +234,6 @@
       return render();
     }
     if ((t = e.target.closest('[data-day]'))) { V.mode = 'day'; V.date = new Date(+t.dataset.day); V.scroll = null; return render(); }
-    if ((t = e.target.closest('[data-add]'))) return addSheet();
   }
 
   // Swipe left/right to change day (the only swipe gesture in the app)
@@ -276,74 +277,7 @@
     });
   }
 
-  function addSheet() {
-    var now = App.now();
-    var st = { who: [], day: 0, time: '15:30', dur: 60, title: '' };
-    var days = [0, 1, 2, 3, 4];
-    var times = ['08:00', '12:00', '15:30', '16:30', '18:00', '19:30'].map(function (t) {
-      var p = t.split(':');
-      return [t, t === '12:00' ? T('Noon') : App.fmt.hour(new Date(2000, 0, 1, +p[0], +p[1]))];
-    });
-    var ideas = ['Soccer', 'Playdate', 'Dentist', 'Dinner out', 'Swim', 'Birthday party'].map(function (i) { return T(i); });
-    App.sheet(
-      '<div class="sheet-pad add">' +
-      '<div class="label">' + T('New event') + '</div>' +
-      '<input class="big-input serif" placeholder="' + T('What’s happening?') + '" data-f="title">' +
-      '<div class="chips">' + ideas.map(function (i) { return '<button class="chip chip--ghost" data-idea="' + i + '">' + i + '</button>'; }).join('') + '</div>' +
-      '<div class="label">' + T('Who') + '</div><div class="add-who">' + D.people.map(function (p) {
-        return '<button class="who-btn" data-who="' + p.id + '" style="' + App.pstyle(p) + '">' + App.avatar(p, 56) + '<span>' + p.name + '</span></button>';
-      }).join('') + '<button class="who-btn" data-who="all" style="' + App.pstyle(D.family) + '">' + App.avatar(D.family, 56) + '<span>' + T('Everyone') + '</span></button></div>' +
-      '<div class="add-row"><div><div class="label">' + T('When') + '</div><div class="chips">' + days.map(function (i) {
-        var d = App.addDays(now, i);
-        return '<button class="chip' + (i === 0 ? ' is-on' : '') + '" data-dayi="' + i + '">' + (i < 2 ? App.fmt.rel(d) : App.fmt.dayShort(d) + ' ' + d.getDate()) + '</button>';
-      }).join('') + '</div></div></div>' +
-      '<div class="add-row"><div><div class="label">' + T('Time') + '</div><div class="chips">' + times.map(function (t) {
-        return '<button class="chip' + (t[0] === st.time ? ' is-on' : '') + '" data-time="' + t[0] + '">' + t[1] + '</button>';
-      }).join('') + '</div></div>' +
-      '<div><div class="label">' + T('Length') + '</div><div class="chips">' + [[30, T('30m')], [60, T('1h')], [120, T('2h')]].map(function (t) {
-        return '<button class="chip' + (t[0] === st.dur ? ' is-on' : '') + '" data-dur="' + t[0] + '">' + t[1] + '</button>';
-      }).join('') + '</div></div></div>' +
-      '<div class="sheet-actions"><button class="btn btn--ghost" data-close>' + T('Cancel') + '</button><button class="btn btn--solid" data-save>' + T('Add to calendar') + '</button></div>' +
-      '</div>', {
-      cls: 'sheet--wide',
-      onMount: function (s, close) {
-        var input = s.querySelector('[data-f=title]');
-        s.addEventListener('click', function (ev) {
-          var t = ev.target.closest('button');
-          if (!t) return;
-          if (t.dataset.idea) { input.value = t.dataset.idea; }
-          if (t.dataset.who) {
-            if (t.dataset.who === 'all') st.who = st.who.length === 4 ? [] : D.ALL.slice();
-            else { var i = st.who.indexOf(t.dataset.who); if (i > -1) st.who.splice(i, 1); else st.who.push(t.dataset.who); }
-            App.$$('[data-who]', s).forEach(function (b) {
-              b.classList.toggle('is-on', b.dataset.who === 'all' ? st.who.length === 4 : st.who.indexOf(b.dataset.who) > -1);
-            });
-          }
-          ['dayi', 'time', 'dur'].forEach(function (k) {
-            if (t.dataset[k] != null) {
-              App.$$('[data-' + k + ']', s).forEach(function (b) { b.classList.toggle('is-on', b === t); });
-              if (k === 'dayi') st.day = +t.dataset.dayi; else if (k === 'dur') st.dur = +t.dataset.dur; else st.time = t.dataset.time;
-            }
-          });
-          if (t.hasAttribute('data-save')) {
-            var title = input.value.trim() || T('New event');
-            var who = st.who.length ? st.who.slice() : ['jordan'];
-            var start = App.addDays(App.dayStart(now), st.day), p = st.time.split(':');
-            start.setHours(+p[0], +p[1]);
-            var e = { id: D._eid(), title: title, people: who, start: start, end: new Date(+start + st.dur * 60000) };
-            D.events.push(e);
-            close();
-            V.date = App.dayStart(start); V.mode = V.mode === 'month' ? 'day' : V.mode; V.scroll = null;
-            render();
-            App.emit('data');
-            App.toast(T('Added {title}', { title: '<b>' + App.esc(title) + '</b>' }) + ' · ' + App.fmt.rel(start) + ' ' + App.fmt.time(start), {
-              icon: 'calendar', undo: function () { D.events.splice(D.events.indexOf(e), 1); render(); App.emit('data'); }
-            });
-          }
-        });
-      }
-    });
-  }
+  App.on('data', function () { if (App.current === 'calendar' && V.el) render(); });
 
   App.register('calendar', {
     show: function (el, opts) {

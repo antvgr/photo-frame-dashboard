@@ -1,6 +1,6 @@
 {
-  "name": "Home HQ",
-  "short_name": "Home HQ",
+  "name": "Home Screen",
+  "short_name": "Home Screen",
   "start_url": "/",
   "scope": "/",
   "display": "fullscreen",

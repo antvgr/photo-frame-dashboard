@@ -1,4 +1,3 @@
 node_modules
 dist
-.wrangler
-kiosk/build
+dist-ha
