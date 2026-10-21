@@ -90,6 +90,8 @@
       var imgs = Array.prototype.filter.call(document.images, function (i) { return i.naturalWidth; });
       var mpx = imgs.reduce(function (s, i) { return s + i.naturalWidth * i.naturalHeight; }, 0) / 1e6;
       var mem = performance.memory ? Math.round(performance.memory.usedJSHeapSize / 1048576) + ' MB' : 'n/a';
+      S.n = (S.n || 0) + 1;
+      if (S.n % 10 === 0) console.log('DIAGSTAT fps=' + (1000 / avg).toFixed(0) + ' frame=' + avg.toFixed(0) + 'ms jank=' + S.jank + ' dom=' + document.getElementsByTagName('*').length + ' data=' + (window.__dataEvents || 0) + ' builds=' + (window.__builds || 0));
       panel.innerHTML =
         '<b>DIAG</b> ' + ua() + ' · exp ' + (EXP.join(',') || 'none') + '<br>' +
         'viewport ' + innerWidth + '×' + innerHeight + ' · dpr ' + devicePixelRatio + ' · scale ' + scale.toFixed(3) + '<br>' +

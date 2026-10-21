@@ -22,7 +22,7 @@
     var saved = read();
     if (saved && locales[saved]) return saved;
     var nav = (navigator.language || 'en').slice(0, 2).toLowerCase();
-    return locales[nav] ? nav : 'en';
+    return locales[nav] ? nav : (locales.fr ? 'fr' : 'en');
   }
 
   var I18N = window.I18N = {

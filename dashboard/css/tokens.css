@@ -1,3 +1,12 @@
+/* DM Sans (SIL Open Font License 1.1, see public/fonts/DM-Sans-OFL.txt), variable weight 400-700, hosted here:
+   the frame never has to contact a font server. */
+@font-face { font-family: 'DM Sans'; font-style: normal; font-weight: 400 700; font-display: swap;
+  src: url(/fonts/dm-sans-latin-ext.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: 'DM Sans'; font-style: normal; font-weight: 400 700; font-display: swap;
+  src: url(/fonts/dm-sans-latin.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+
 /* Design tokens. Target: Android WebView 106 — no nesting, no color-mix(), no oklch(), no dvh. */
 :root {
   /* paper + ink */
@@ -20,14 +29,22 @@
   --warm-rgb: 255 196 92;
   --night: #D8321F;
 
+  /* dark surfaces used in both themes (climate card, toasts, settings drawer…) */
+  --panel: #111111;
+  --on-panel: #FFFFFF;
+  --tint: rgb(0 0 0 / .035);
+  --tile-on: #FFF1D0;
+  --bike-tire: #2B2B2B;
+  --bike-rim: #C9CED2;
+
   /* person colour defaults (overridden inline per element) */
   --c: var(--ink);
   --c-rgb: var(--ink-rgb);
   --c-ink: #FFFFFF;
 
   /* type */
-  --sans: 'Archivo', 'Roboto Condensed', 'Roboto', system-ui, sans-serif;
-  --serif: 'Instrument Serif', 'Noto Serif', Georgia, serif;
+  --sans: 'DM Sans', system-ui, 'Roboto', sans-serif;
+  --serif: 'DM Sans', system-ui, 'Roboto', sans-serif;
   --fs-clock: 150px;
   --fs-hero: 76px;
   --fs-xl: 56px;
@@ -45,4 +62,22 @@
   --tap: 64px;
   --ease: cubic-bezier(.2, .8, .2, 1);
   --spring: cubic-bezier(.34, 1.56, .64, 1);
+}
+
+/* Dark theme: applied from the settings drawer or automatically after sunset (see App.applyTheme). */
+html[data-theme="dark"] {
+  --paper: #0E0E0F;
+  --paper-2: #1D1D20;
+  --card: #18181B;
+  --ink: #D8D3C8;
+  --ink-rgb: 216 211 200;
+  --ink-2: #B0ABA1;
+  --mute: #858077;
+  --line: #2E2D2B;
+  --panel: #27272B;
+  --on-panel: #D8D3C8;
+  --tint: rgb(255 255 255 / .05);
+  --tile-on: rgb(255 196 92 / .22);
+  --bike-tire: #BBB6AC;
+  --bike-rim: #55585D;
 }
