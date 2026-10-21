@@ -1,14 +1,40 @@
-# Taking over Android photo frames
+# Home Screen: a wall dashboard for a locked-down Android photo frame
 
-[![The family dashboard running on the BIUFRAME 10.1" photo frame](docs/images/dashboard-on-frame.jpg)](https://youtu.be/ZLycoUMltNI)
+🇬🇧 English · [🇫🇷 Français](#home-screen-un-tableau-de-bord-mural-pour-cadre-photo-android)
 
-▶️ **Watch the video: [https://youtu.be/ZLycoUMltNI](https://youtu.be/ZLycoUMltNI)**
+**Live demo (fictional household): <https://coinc.fr/dev/wall-frame/>**
 
-If you are coming from reddit or youtube, you can purchase almost any photo frame from amazon. This is the one, I used: [https://amzn.to/4zneGNM](https://amzn.to/4zneGNM) (amazon aff link)
+A full-screen Home Assistant dashboard for an Android photo frame you have taken over (tested on a PF1007L: Allwinner A33, Android 6.0.1). Home screen with weather, agenda, music and house status, an appliances page with one animation per step (oven, washing machine, dishwasher, coffee machine), a player, an agenda, home control and a standby screen, in landscape or portrait. The interface is in French.
+
+This repository is a fork of [wesbos/photo-frame-dashboard](https://github.com/wesbos/photo-frame-dashboard). The upstream work, on how to get control of these frames, is kept below and in `docs/`. The dashboard and the kiosk app are in [`dashboard/`](dashboard/README.md) and the PC scripts in `tools/`.
+
+- **Dashboard and setup**: [dashboard/README.md](dashboard/README.md) (English and French)
+- **Get control of the frame** (ADB, firmware backup, root, removing the vendor app): [the guides below](#taking-over-android-photo-frames-upstream-guides)
+- **Try it without Home Assistant**: `cd dashboard && npm install && npm run dev`, then open `http://localhost:5173/?view=home&m=linge:rinse,four:cook`
+
+---
+
+# Home Screen, un tableau de bord mural pour cadre photo Android
+
+[🇬🇧 English](#home-screen-a-wall-dashboard-for-a-locked-down-android-photo-frame) · 🇫🇷 Français
+
+**Démo en ligne (maison fictive) : <https://coinc.fr/dev/wall-frame/>**
+
+Un dashboard Home Assistant plein écran pour un cadre photo Android dont vous avez pris le contrôle (testé sur un PF1007L : Allwinner A33, Android 6.0.1). Écran d'accueil avec météo, agenda, musique et état de la maison, page électroménager avec une animation par étape (four, lave-linge, lave-vaisselle, machine à café), lecteur, agenda, domotique et écran de veille, en paysage ou en portrait. L'interface est en français.
+
+Ce dépôt est un fork de [wesbos/photo-frame-dashboard](https://github.com/wesbos/photo-frame-dashboard). Le travail d'origine, sur la prise de contrôle de ces cadres, est conservé plus bas et dans `docs/`. Le dashboard et le kiosque Android sont dans [`dashboard/`](dashboard/README.md), les scripts PC dans `tools/`.
+
+- **Dashboard et installation** : [dashboard/README.md](dashboard/README.md) (anglais et français)
+- **Prendre le contrôle du cadre** (ADB, sauvegarde du firmware, root, retrait de l'application d'origine) : [les guides ci-dessous](#taking-over-android-photo-frames-upstream-guides)
+- **Essayer sans Home Assistant** : `cd dashboard && npm install && npm run dev`, puis ouvrez `http://localhost:5173/?view=home&m=linge:rinse,four:cook`
+
+---
+
+# Taking over Android photo frames (upstream guides)
 
 Notes and scripts from getting full control of locked-down Android displays: getting ADB,
 backing up the firmware, getting root, removing the vendor app, and running our own launcher,
-browser and kiosk app.
+browser and kiosk app. These guides come from [wesbos/photo-frame-dashboard](https://github.com/wesbos/photo-frame-dashboard).
 
 **Which frame do you have?** Frames sold under the same name, even the same Amazon listing, can
 have different boards. Check Settings → About before you follow any guide:
