@@ -4,6 +4,8 @@
 
 **Live demo (fictional household): <https://coinc.fr/dev/wall-frame/>**
 
+[![Home screen of the dashboard](docs/images/home-screen.jpg)](https://coinc.fr/dev/wall-frame/)
+
 A full-screen Home Assistant dashboard for an Android photo frame you have taken over (tested on a PF1007L: Allwinner A33, Android 6.0.1). Home screen with weather, agenda, music and house status, an appliances page with one animation per step (oven, washing machine, dishwasher, coffee machine), a player, an agenda, home control and a standby screen, in landscape or portrait. The interface is in French.
 
 This repository is a fork of [wesbos/photo-frame-dashboard](https://github.com/wesbos/photo-frame-dashboard). The upstream work, on how to get control of these frames, is kept below and in `docs/`. The dashboard and the kiosk app are in [`dashboard/`](dashboard/README.md) and the PC scripts in `tools/`.
@@ -19,6 +21,8 @@ This repository is a fork of [wesbos/photo-frame-dashboard](https://github.com/w
 [🇬🇧 English](#home-screen-a-wall-dashboard-for-a-locked-down-android-photo-frame) · 🇫🇷 Français
 
 **Démo en ligne (maison fictive) : <https://coinc.fr/dev/wall-frame/>**
+
+[![Écran d'accueil du dashboard](docs/images/home-screen.jpg)](https://coinc.fr/dev/wall-frame/)
 
 Un dashboard Home Assistant plein écran pour un cadre photo Android dont vous avez pris le contrôle (testé sur un PF1007L : Allwinner A33, Android 6.0.1). Écran d'accueil avec météo, agenda, musique et état de la maison, page électroménager avec une animation par étape (four, lave-linge, lave-vaisselle, machine à café), lecteur, agenda, domotique et écran de veille, en paysage ou en portrait. L'interface est en français.
 

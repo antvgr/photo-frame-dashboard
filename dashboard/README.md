@@ -4,6 +4,8 @@
 
 **Live demo (fictional household): <https://coinc.fr/dev/wall-frame/>**
 
+[![Home screen of the dashboard](../docs/images/home-screen.jpg)](https://coinc.fr/dev/wall-frame/)
+
 A full-screen dashboard for a locked-down Android photo frame (tested on a PF1007L: Allwinner A33, Android 6.0.1, WebView 106), driven by your Home Assistant. Plain JavaScript, built with Vite. The interface is in French.
 
 This work starts from [wesbos/photo-frame-dashboard](https://github.com/wesbos/photo-frame-dashboard), whose guides explain how to get ADB, back up the firmware and replace the vendor app. They are in `docs/` at the root of this repository. Everything here is what runs on the frame once it is yours.
@@ -62,6 +64,8 @@ Based on [wesbos/photo-frame-dashboard](https://github.com/wesbos/photo-frame-da
 [🇬🇧 English](#home-screen-a-home-assistant-dashboard-for-a-locked-down-android-photo-frame) · 🇫🇷 Français
 
 **Démo en ligne (maison fictive) : <https://coinc.fr/dev/wall-frame/>**
+
+[![Écran d'accueil du dashboard](../docs/images/home-screen.jpg)](https://coinc.fr/dev/wall-frame/)
 
 Un dashboard plein écran pour un cadre photo Android verrouillé (testé sur un PF1007L : Allwinner A33, Android 6.0.1, WebView 106), piloté par votre Home Assistant. JavaScript sans framework, construit avec Vite. L'interface est en français.
 
