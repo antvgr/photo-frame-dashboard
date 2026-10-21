@@ -38,15 +38,23 @@ try {
 
 try {
   $dest = "HAcfg:\$Target"
-  if (Test-Path $dest) { Get-ChildItem $dest -Force | Remove-Item -Recurse -Force }   # ne vide que le dossier cadre
+  # on supprime les anciens fichiers mais on garde les dossiers (le partage Samba supprime les dossiers avec retard, ce qui faisait echouer la copie)
+  if (Test-Path $dest) { Get-ChildItem $dest -Recurse -File -Force | Remove-Item -Force }   # ne vide que le dossier cadre
   else { New-Item -ItemType Directory -Path $dest -Force | Out-Null }
   # fichier par fichier : Copy-Item -Recurse echoue quand un sous-dossier (fonts, meteocons...) n'existe pas encore sur le partage
   $base = (Resolve-Path $out).Path.TrimEnd('\')
   foreach ($f in Get-ChildItem $out -Recurse -File) {
     $rel = $f.FullName.Substring($base.Length).TrimStart('\')
     $to = Join-Path $dest $rel
-    New-Item -ItemType Directory -Path (Split-Path $to -Parent) -Force | Out-Null
-    Copy-Item -LiteralPath $f.FullName -Destination $to -Force
+    $ok = $false
+    for ($try = 1; $try -le 5 -and -not $ok; $try++) {
+      try {
+        New-Item -ItemType Directory -Path (Split-Path $to -Parent) -Force -ErrorAction Stop | Out-Null
+        Copy-Item -LiteralPath $f.FullName -Destination $to -Force -ErrorAction Stop
+        $ok = $true
+      } catch { Start-Sleep -Milliseconds (400 * $try) }
+    }
+    if (-not $ok) { Write-Host "Echec : $rel" -ForegroundColor Red; exit 1 }
   }
   $n = (Get-ChildItem $dest -Recurse -File).Count
   Write-Host "$n fichiers copies dans $Share\$Target" -ForegroundColor Green
